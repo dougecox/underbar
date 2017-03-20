@@ -49,13 +49,10 @@
   // Note: _.each does not have a return value, but rather simply runs the
   // iterator function over each item in the input collection.
   _.each = function(collection, iterator) {
-    var element;
-    var index;
+    
     if ( Array.isArray(collection) ) {
       for ( var i =0 ; i < collection.length; i++) {
-        element = collection[i];
-        index = i;
-        iterator(element, index, collection);
+        iterator(collection[i], i, collection);
       }
     }
     else {
@@ -371,7 +368,6 @@ _.reduce = function(collection, iterator, accumulator) {
     for (var i = 0; i < array.length; i++) {
       var randomNumber = getRandomInt(0, copyArray.length );
       var spliced = copyArray.splice(randomNumber, 1)[0];
-      
       shuffleArray.push(spliced);
     }
     // console.log(shuffleArray);
@@ -389,13 +385,35 @@ _.reduce = function(collection, iterator, accumulator) {
   // Calls the method named by functionOrKey on each value in the list.
   // Note: You will need to learn a bit about .apply to complete this.
   _.invoke = function(collection, functionOrKey, args) {
+    return _.map(collection, function(element) {
+      if ( typeof functionOrKey === 'function' ) {
+        return functionOrKey.apply(element, args);
+      }
+      else {
+        return element[functionOrKey](args);
+      }
+    });
+    
+
   };
+
+
 
   // Sort the object's values by a criterion produced by an iterator.
   // If iterator is a string, sort objects by that property with the name
   // of that string. For example, _.sortBy(people, 'name') should sort
   // an array of people by their name.
-  _.sortBy = function(collection, iterator) {
+  _.sortBy = function(collection, iterator) { 
+    if ( typeof iterator === 'string') {
+      return collection.sort( function(a,b) {
+        return a[iterator] - b[iterator];
+        });
+    }
+    
+    return collection.sort( function(a,b) {
+      return iterator(a) - iterator(b);
+    });
+    
   };
 
   // Zip together two or more arrays with elements of the same index
@@ -404,13 +422,21 @@ _.reduce = function(collection, iterator, accumulator) {
   // Example:
   // _.zip(['a','b','c','d'], [1,2,3]) returns [['a',1], ['b',2], ['c',3], ['d',undefined]]
   _.zip = function() {
+      
+
   };
+
 
   // Takes a multidimensional array and converts it to a one-dimensional array.
   // The new array should contain all elements of the multidimensional array.
   //
   // Hint: Use Array.isArray to check if something is an array
   _.flatten = function(nestedArray, result) {
+    return _.reduce( nestedArray, function( acc, val) {
+      return acc.concat ( Array.isArray(val) ? _.flatten(val) : (val) ) ;
+
+
+    },[])
   };
 
   // Takes an arbitrary number of arrays and produces an array that contains
